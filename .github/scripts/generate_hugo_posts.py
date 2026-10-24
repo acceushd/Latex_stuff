@@ -41,14 +41,14 @@ for main_tex in sorted(latex_root.glob("*/main.tex")):
     title = json.dumps(name)
 
     content = f"""---
-title: {title}
-date: {json.dumps(lastmod)}
-lastmod: {json.dumps(lastmod)}
-draft: false
----
-
-This page corresponds to the LaTeX project in `latex_files/{name}/`.
-"""
+    title: {title}
+    date: {json.dumps(lastmod)}
+    lastmod: {json.dumps(lastmod)}
+    draft: false
+    ---
+    
+    {{{{< pdf-list "{name}" >}}}}
+    """
 
     post.write_text(content, encoding="utf-8")
     print(f"Generated {post.relative_to(repo)} (last updated {lastmod})")

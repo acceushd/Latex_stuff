@@ -1,0 +1,40 @@
+
+{{- $project := .Get 0 -}}
+{{- $diskPath := printf "static/latex_files/%s" $project -}}
+{{- $webPath := printf "latex_files/%s" $project | relURL -}}
+{{- $files := readDir $diskPath -}}
+{{- $pdfs := slice -}}
+
+{{- range $files -}}
+  {{- if and (not .IsDir) (strings.HasSuffix (lower .Name) ".pdf") -}}
+    {{- $pdfs = $pdfs | append .Name -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $sorted := slice -}}
+{{- range $pdfs -}}
+  {{- $version := replaceRE "^.*-v([0-9]+)\\.([0-9]+)\\.pdf$" "$1.$2" . -}}
+  {{- $parts := split $version "." -}}
+  {{- $major := int (index $parts 0) -}}
+  {{- $minor := int (index $parts 1) -}}
+  {{- $key := printf "%010d.%010d" $major $minor -}}
+  {{- $sorted = $sorted | append (dict "name" . "key" $key) -}}
+{{- end -}}
+{{- $sorted = sort $sorted "key" "desc" -}}
+
+<div class="pdf-list">
+  {{- range $sorted }}
+    <a class="pdf-list-item" href="{{ printf "%s/%s" $webPath .name }}">
+      <svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg"
+           width="20" height="20" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="1.7"
+           stroke-linecap="round" stroke-linejoin="round"
+           aria-hidden="true">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <path d="M14 2v6h6"/>
+        <path d="M7 15h10M7 18h7"/>
+      </svg>
+      <span>{{ .name }}</span>
+    </a>
+  {{- end }}
+</div>

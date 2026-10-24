@@ -1,0 +1,26 @@
+
+.pdf-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 1rem 0;
+}
+
+.pdf-list-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 8px;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.pdf-list-item:hover {
+  background: var(--code-bg);
+}
+
+.pdf-icon {
+  flex-shrink: 0;
+  color: #d9534f;
+}
