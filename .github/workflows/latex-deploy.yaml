@@ -77,7 +77,7 @@ jobs:
           FILE: ${{ steps.doc.outputs.file }}
           TAG: ${{ github.ref_name }}
         run: |
-          mkdir -p papers
+          mkdir -p latex_files
 
           cp "../source/$(dirname "$FILE")/main.pdf" "latex_files/$NAME.pdf"
           cp "../source/$(dirname "$FILE")/main.pdf" "latex_files/$NAME-$VERSION.pdf"
@@ -86,7 +86,7 @@ jobs:
           git config user.email \
             "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add papers/
+          git add latex_files/
 
           if ! git diff --cached --quiet; then
             git commit -m "Publish $NAME $VERSION ($TAG)"
