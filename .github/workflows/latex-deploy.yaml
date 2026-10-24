@@ -113,8 +113,8 @@ jobs:
       - name: Copy archived PDFs into Hugo
         shell: bash
         run: |
-          mkdir -p site-source/site/static/papers
-          cp archive/papers/*.pdf site-source/site/static/papers/
+          mkdir -p site-source/site/static/latex_files
+          cp archive/latex_files/*.pdf site-source/site/static/latex_files/
 
       - name: Build Hugo site
         working-directory: site-source/site
