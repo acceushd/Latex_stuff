@@ -1,1 +1,14 @@
 name: compile Latex check
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v7
+      - name: compile
+        uses: xu-cheng/latex-action@v4
