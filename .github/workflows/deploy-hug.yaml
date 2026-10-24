@@ -57,13 +57,86 @@ jobs:
           hugo-version: latest
           extended: true
 
+
       - name: Copy archived PDFs into Hugo
+        shell: bash
         run: |
-          mkdir -p site/static/latex_files
-          cp archive/latex_files/*.pdf site/static/latex_files/
+          set -euo pipefail
+          mkdir -p site-source/site/static/latex_files
+          if compgen -G "archive/latex_files/*.pdf" > /dev/null; then
+            cp archive/latex_files/*.pdf site-source/site/static/latex_files/
+          else
+            echo "No archived PDFs found; continuing without PDFs."
+          fi
 
       - name: Generate posts from LaTeX directories
-        run: python3 site-source/.github/scripts/generate_hugo_posts.py site-source
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 site-source/.github/scripts/generate_hugo_posts.py site-source
+
+      - name: Generate PDF lists for project posts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          root = Path("site-source")
+          posts_dir = root / "site" / "content" / "posts"
+          pdf_dir = root / "site" / "static" / "latex_files"
+
+          def version_key(path):
+              match = re.search(r"-v(\d+(?:\.\d+)*)$", path.stem)
+              if not match:
+                  return ()
+              return tuple(int(part) for part in match.group(1).split("."))
+
+          def project_name(pdf):
+              match = re.match(r"(.+)-v\d+(?:\.\d+)*$", pdf.stem)
+              return match.group(1) if match else None
+
+          pdfs_by_project = {}
+          for pdf in pdf_dir.glob("*.pdf"):
+              project = project_name(pdf)
+              if project:
+                  pdfs_by_project.setdefault(project, []).append(pdf)
+
+          for post in posts_dir.glob("*.md"):
+              project = post.stem
+              pdfs = pdfs_by_project.get(project, [])
+              if not pdfs:
+                  continue
+
+              # Sort numeric versions descending, e.g. v2.1 before v1.3.
+              pdfs.sort(key=version_key, reverse=True)
+
+              content = post.read_text(encoding="utf-8")
+              marker = "<!-- PDF_LIST_START -->"
+              end_marker = "<!-- PDF_LIST_END -->"
+
+              # Replace an existing generated list, if present.
+              if marker in content and end_marker in content:
+                  before = content.split(marker, 1)[0]
+                  after = content.split(end_marker, 1)[1]
+              else:
+                  before = content.rstrip() + "\n\n"
+                  after = "\n"
+
+              lines = [marker, "## PDF versions", ""]
+              for pdf in pdfs:
+                  url = "/Latex_stuff/latex_files/" + pdf.name
+                  lines.append(f"- [📄 {pdf.stem}]({url})")
+              lines.extend([end_marker, ""])
+
+              post.write_text(
+                  before + "\n".join(lines) + after,
+                  encoding="utf-8"
+              )
+              print(f"Added {len(pdfs)} PDFs to {post}")
+          PY
+
 
       - name: Build Hugo site
         working-directory: site-source/site
