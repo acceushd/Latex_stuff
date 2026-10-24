@@ -112,21 +112,35 @@ jobs:
           hugo-version: latest
           extended: true
 
-      - name: Copy archived PDFs into Hugo
+      - name: Copy archived PDFs into project directories
         shell: bash
         run: |
-          set -euxo pipefail
-          mkdir -p site-source/site/static/latex_files
-          if compgen -G "archive/latex_files/*.pdf" > /dev/null; then
-            cp archive/latex_files/*.pdf site-source/site/static/latex_files/
-            echo "Copied PDF files:"
-            ls -ahl site-source/site/static/latex_files
-          else
-            echo "No PDFs found in archive/latex_files/"
-            find archive -type f -name '*.pdf'
-          fi
-          echo "PDFs copied into Hugo static directory:"
-          find site-source/site/static/latex_files -maxdepth 1 -type f -name '*.pdf' -print
+          set -euo pipefail
+
+          source_dir="archive/latex_files"
+          target_dir="site-source/site/static/latex_files"
+
+          mkdir -p "$target_dir"
+
+          for pdf in "$source_dir"/*.pdf; do
+            [ -f "$pdf" ] || continue
+
+            filename="$(basename "$pdf")"
+            project="${filename%%-*}"
+
+            # For unversioned names such as presentation.pdf,
+            # use the filename without its extension.
+            if [[ "$filename" != *-* ]]; then
+              project="${filename%.pdf}"
+            fi
+
+            mkdir -p "$target_dir/$project"
+            cp "$pdf" "$target_dir/$project/$filename"
+            echo "Copied $filename -> $target_dir/$project/$filename"
+          done
+
+          echo "Final PDF directory structure:"
+          find "$target_dir" -type f -name '*.pdf' | sort
 
       - name: Generate posts from LaTeX directories
         shell: bash
