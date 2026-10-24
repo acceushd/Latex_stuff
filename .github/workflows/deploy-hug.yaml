@@ -57,7 +57,6 @@ jobs:
           hugo-version: latest
           extended: true
 
-
       - name: Copy archived PDFs into Hugo
         shell: bash
         run: |
@@ -136,6 +135,33 @@ jobs:
               )
               print(f"Added {len(pdfs)} PDFs to {post}")
           PY
+
+      - name: Validate generated Hugo front matter
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in site-source/site/content/posts/*.md; do
+            [ -f "$file" ] || continue
+            echo "Checking $file"
+            sed -n '1,20p' "$file"
+
+            python3 - "$file" <<'PY'
+          import pathlib
+          import sys
+
+          path = pathlib.Path(sys.argv[1])
+          text = path.read_text(encoding="utf-8")
+          lines = text.splitlines()
+
+          if not lines or lines[0].strip() != "---":
+              raise SystemExit(f"ERROR: {path} does not start with YAML front matter")
+
+          if not any(line.strip() == "---" for line in lines[1:]):
+              raise SystemExit(f"ERROR: {path} has no closing --- delimiter")
+
+          print(f"Front matter delimiters found: {path}")
+          PY
+          done
 
 
       - name: Build Hugo site
