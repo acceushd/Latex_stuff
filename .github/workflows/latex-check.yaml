@@ -2,13 +2,77 @@ name: compile Latex check
 
 on:
   push:
-    branches: [ "main" ]
+    paths:
+      - '**.tex'
+      - '**.bib'
+      - '**.sty'
+      - '**.cls'
+      - '**.bst'
+      - '**.bbx'
+      - '**.cbx'
+      - '**.lbx'
+      - '**.png'
+      - '**.jpg'
+      - '**.jpeg'
+      - '**.pdf'
+      - '**.svg'
+      - '**.eps'
+      - '**.tikz'
+      - '**.csv'
+  pull_request:
+    paths:
+      - '**.tex'
+      - '**.bib'
+      - '**.sty'
+      - '**.cls'
+      - '**.bst'
+      - '**.bbx'
+      - '**.cbx'
+      - '**.lbx'
+      - '**.png'
+      - '**.jpg'
+      - '**.jpeg'
+      - '**.pdf'
+      - '**.svg'
+      - '**.eps'
+      - '**.tikz'
+      - '**.csv'
+
+permissions:
+  contents: read
+
 
 jobs:
-  check:
+  compile:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
         uses: actions/checkout@v7
-      - name: compile
+        with:
+          fetch-depth: 0
+      
+      - name: Find affected documents
+        id: affected
+        env:
+          BEFORE: ${{ github.event.before }}
+          SHA: ${{ github.sha }}
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [[ "$EVENT" == "pull_request" ]]; then
+            git diff --name-only "$BASE...${{ github.event.pull_request.head.sha }}" > changed.txt
+          elif [[ -n "$BEFORE" && "$BEFORE" != "0000000000000000000000000000000000000000" ]]; then
+            git diff --name-only "$BEFORE" "$SHA" > changed.txt
+          else
+            find latex_files -type f > changed.txt
+          fi
+
+          python3 .github/scripts/affected_tex.py \
+            changed.txt "$GITHUB_OUTPUT"
+          
+      - name: Compile affected documents
+        if: steps.affected.outputs.root_files != ''
         uses: xu-cheng/latex-action@v4
+        with:
+          root_file: ${{ steps.affected.outputs.root_files }}
+          work_in_root_file_dir: true
