@@ -62,7 +62,7 @@ jobs:
       - name: Build Hugo site
         working-directory: site
         env:
-          BASE_URL: ${{ steps.pages.outputs.base_url }}
+          BASE_URL: https://acceushd.github.io/Latex_stuff/
         run: |
           base="$BASE_URL"
           [[ "$base" == */ ]] || base="$base/"

@@ -120,14 +120,14 @@ jobs:
         working-directory: site-source/site
         shell: bash
         env:
-          BASE_URL: ${{ steps.pages.outputs.base_url }}
+          BASE_URL: https://acceushd.github.io/Latex_stuff/
         run: |
           base="$BASE_URL"
           [[ "$base" == */ ]] || base="$base/"
           hugo --minify --baseURL "$base"
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: site-source/site/public
 
