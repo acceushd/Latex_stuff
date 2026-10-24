@@ -40,15 +40,16 @@ for main_tex in sorted(latex_root.glob("*/main.tex")):
     post = posts_dir / f"{name}.md"
     title = json.dumps(name)
 
-    content = f"""---
-    title: {title}
-    date: {json.dumps(lastmod)}
-    lastmod: {json.dumps(lastmod)}
-    draft: false
-    ---
-    
-    {{{{< pdf-list "{name}" >}}}}
-    """
+    content = (
+        "---\n"
+        f"title: {title}\n"
+        f"date: {json.dumps(lastmod)}\n"
+        f"lastmod: {json.dumps(lastmod)}\n"
+        "draft: false\n"
+        "---\n"
+        "\n"
+        f'{{{{< pdf-list "{name}" >}}}}\n'
+    )
 
     post.write_text(content, encoding="utf-8")
     print(f"Generated {post.relative_to(repo)} (last updated {lastmod})")
