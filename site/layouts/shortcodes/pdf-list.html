@@ -11,16 +11,34 @@
   {{- end -}}
 {{- end -}}
 
+```go-html-template
 {{- $sorted := slice -}}
+
 {{- range $pdfs -}}
-  {{- $version := replaceRE "^.*-v([0-9]+)\\.([0-9]+)\\.pdf$" "$1.$2" . -}}
+  {{- $name := . -}}
+  {{- $version := replaceRE (printf "^%s-" $project) "" $name -}}
+  {{- $version = replaceRE "\\.pdf$" "" $version -}}
+
   {{- $parts := split $version "." -}}
-  {{- $major := int (index $parts 0) -}}
-  {{- $minor := int (index $parts 1) -}}
-  {{- $key := printf "%010d.%010d" $major $minor -}}
-  {{- $sorted = $sorted | append (dict "name" . "key" $key) -}}
+  {{- $key := "" -}}
+
+  {{- if eq $name (printf "%s.pdf" $project) -}}
+    {{- $key = "0000000000.0000000000.0000000000" -}}
+  {{- else -}}
+    {{- range $parts -}}
+      {{- $number := 0 -}}
+      {{- if findRE "^[0-9]+$" . -}}
+        {{- $number = int . -}}
+      {{- end -}}
+      {{- $key = printf "%s.%010d" $key $number -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- $sorted = $sorted | append (dict "name" $name "key" $key) -}}
 {{- end -}}
+
 {{- $sorted = sort $sorted "key" "desc" -}}
+```
 
 <div class="pdf-list">
   {{- range $sorted }}
