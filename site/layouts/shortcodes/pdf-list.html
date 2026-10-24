@@ -11,7 +11,6 @@
   {{- end -}}
 {{- end -}}
 
-```go-html-template
 {{- $sorted := slice -}}
 
 {{- range $pdfs -}}
@@ -38,7 +37,6 @@
 {{- end -}}
 
 {{- $sorted = sort $sorted "key" "desc" -}}
-```
 
 <div class="pdf-list">
   {{- range $sorted }}
