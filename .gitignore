@@ -13,10 +13,8 @@
 **hugo.darwin
 **hugo.linux
 
-**/.hugo.build.lock
-
 # Temporary lock file while building
-/.hugo_build.lock
+**/.hugo_build.lock
 
 ### LaTeX ###
 ## Core latex/pdflatex auxiliary files:
