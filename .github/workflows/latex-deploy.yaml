@@ -123,12 +123,19 @@ jobs:
       - name: Build Hugo site
         working-directory: site-source/site
         shell: bash
-        env:
-          BASE_URL: https://acceushd.github.io/Latex_stuff/
         run: |
-          base="$BASE_URL"
-          [[ "$base" == */ ]] || base="$base/"
-          hugo --minify --baseURL "$base"
+          hugo --cleanDestinationDir --minify \
+            --baseURL "https://acceushd.github.io/Latex_stuff/"
+
+      - name: Check for development URLs
+        working-directory: site-source/site
+        run: |
+          if grep -R -n -E \
+            'livereload\.js|localhost:12345|localhost:1313|file:///' \
+            public --include='*.html'; then
+            echo "Unexpected development URL found in production HTML"
+            exit 1
+          fi
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5
