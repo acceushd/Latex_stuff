@@ -24,7 +24,7 @@ jobs:
     steps:
 # Compile the exact source version identified by the tag.
       - name: Check out tagged source
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           path: source
 
@@ -93,12 +93,13 @@ jobs:
             git push origin HEAD:gh-pages
           fi
 
-# Always build the website using the latest Hugo sources on main.
+# Always build the website using the latest Hugo sources on main.    
       - name: Check out current site source
         uses: actions/checkout@v6
         with:
           ref: main
           path: site-source
+          fetch-depth: 0
 
       - name: Configure GitHub Pages
         id: pages
@@ -115,6 +116,9 @@ jobs:
         run: |
           mkdir -p site-source/site/static/latex_files
           cp archive/latex_files/*.pdf site-source/site/static/latex_files/
+
+      - name: Generate posts from LaTeX directories
+        run: python3 site-source/.github/scripts/generate_hugo_posts.py site-source
 
       - name: Build Hugo site
         working-directory: site-source/site

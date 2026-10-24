@@ -32,12 +32,15 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - name: Check out repository
+
+      - name: Check out current site source
         uses: actions/checkout@v7
         with:
           ref: main
+          path: site-source
+          fetch-depth: 0
           submodules: recursive
-      
+
       - name: Check out PDF archive
         uses: actions/checkout@v7
         with:
@@ -58,6 +61,9 @@ jobs:
         run: |
           mkdir -p site/static/latex_files
           cp archive/latex_files/*.pdf site/static/latex_files/
+
+      - name: Generate posts from LaTeX directories
+        run: python3 site-source/.github/scripts/generate_hugo_posts.py site-source
 
       - name: Build Hugo site
         working-directory: site
