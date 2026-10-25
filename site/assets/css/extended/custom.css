@@ -1,4 +1,14 @@
-/* Box around each post on list pages */
+/* Box around the first post on the homepage */
+.first-entry {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    background: var(--entry);
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+/* Box around other post entries on list pages */
 .post-entry {
     border: 1px solid var(--border);
     border-radius: 12px;
@@ -8,7 +18,7 @@
     transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
-/* Subtle hover effect */
+.first-entry:hover,
 .post-entry:hover {
     border-color: var(--primary);
     transform: translateY(-2px);
